@@ -132,3 +132,37 @@ def youtube(request):
     form = DashboardForm()
     context = {'form': form}
     return render(request, 'dashboard/youtube.html',context)
+
+
+def todo(request):
+    if request.method == 'POST':
+        form = TodoForm(request.POST)
+        if form.is_valid():
+            try:
+                finished = request.POST['is_finished']
+                if finished == 'on':
+                    finished = True
+                else:
+                    finished = False
+            except:
+                finished = False
+            todos = Todo(
+                user = request.user,
+                title = request.POST['title'],
+                is_finished = finished
+            )
+            todos.save()
+            messages.success(request, f"Todos added from {request.user.username}")
+    else:
+     form = TodoForm()
+    todo = Todo.objects.filter(user=request.user)
+    if len(todo)==0:
+        todos_done = True
+    else:
+        todos_done = False
+    context = {
+        'form': form,
+        'todos':todo,
+        'todos_done':todos_done
+    }
+    return render(request,'dashboard/todo.html',context)
